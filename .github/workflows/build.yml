@@ -6,6 +6,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: unzip -q NEXORA-android-project.zip
+      - name: Update Kotlin version
+        run: sed -i 's/2\.0\.21/2.2.10/' nexora/build.gradle.kts
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
