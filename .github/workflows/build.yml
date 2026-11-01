@@ -1,25 +1,37 @@
 name: Build NEXORA APK
-on: workflow_dispatch
+
+on:
+  workflow_dispatch:
+
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-      - run: unzip -q NEXORA-android-project.zip
-      - name: Update Kotlin version
-        run: sed -i 's/2\.0\.21/2.2.10/' nexora/build.gradle.kts
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
-      - name: Accept Android licenses
-        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+
+      - uses: android-actions/setup-android@v3
+
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: 8.9
-      - run: gradle :app:assembleDebug --stacktrace
+
+      - name: Extract project
+        run: |
+          unzip NEXORA-android-project.zip
+          cd nexora
+          gradle wrapper --gradle-version 8.9
+
+      - name: Build APK
         working-directory: nexora
+        run: ./gradlew :app:assembleDebug
+
       - uses: actions/upload-artifact@v4
         with:
-          name: nexora-debug-apk
+          name: NEXORA-APK
           path: nexora/app/build/outputs/apk/debug/*.apk
